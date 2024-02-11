@@ -25,7 +25,7 @@ const priceRegEx string = `\d+[\.,]*\d*`
 const itemIDRegEx string = `itm\/([0-9]+)\?`
 
 func main() {
-	pageURL := "https://www.ebay.com/sch/garlandcomputer/m.htmlcsdcsdcs"
+	pageURL := "https://www.ebay.com/sch/garlandcomputer/m.html"
 
 	conditionArg := flag.Int("condition", -1, "type of condition to filter. Possible values are: 3, 4 or 10.")
 
