@@ -25,7 +25,7 @@ const priceRegEx string = `\d+[\.,]*\d*`
 const itemIDRegEx string = `itm\/([0-9]+)\?`
 
 func main() {
-	pageURL := "https://www.ebay.com/sch/garlandcomputer/m.html"
+	pageURL := "https://www.ebay.com/sch/garlandcomputer/m.htmlcsdcsdcs"
 
 	conditionArg := flag.Int("condition", -1, "type of condition to filter. Possible values are: 3, 4 or 10.")
 
@@ -54,10 +54,12 @@ func main() {
 		itemElementList := findItemElementsByClass(pageHTML, "li", "s-item", []*html.Node{})
 		if itemElementList == nil {
 			fmt.Print("Failed to get items\n")
+			os.Exit(1)
 		}
 
 		if len(itemElementList) == 0 {
 			fmt.Print("Failed to get items\n")
+			os.Exit(1)
 		}
 
 		//Check if there are more then one page of results
