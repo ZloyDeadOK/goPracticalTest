@@ -2,7 +2,7 @@ Practical test challenge for TrackStreet
 
 ## BUILD
 
-go build ebay-crawler.go
+cd src && go build
 
 ## USAGE
 
