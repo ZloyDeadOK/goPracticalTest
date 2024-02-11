@@ -35,7 +35,7 @@ func main() {
 		pageURL = fmt.Sprintf("%s?LH_ItemCondition=%d", pageURL, *conditionArg)
 	}
 
-	os.Mkdir("data", os.ModeDir)
+	os.Mkdir("data", 0775)
 
 	for {
 		//Get HTML from the provided URL
