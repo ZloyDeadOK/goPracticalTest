@@ -35,6 +35,8 @@ func main() {
 		pageURL = fmt.Sprintf("%s?LH_ItemCondition=%d", pageURL, *conditionArg)
 	}
 
+	os.Mkdir("data", os.ModeDir)
+
 	for {
 		//Get HTML from the provided URL
 		bodyHTML, err := getPageHTML(pageURL)
@@ -70,8 +72,6 @@ func main() {
 		}
 
 		fmt.Printf("Found %d items\n", len(itemElementList))
-
-		os.Mkdir("data", os.ModeDir)
 
 		//Process nodes from the current page
 		wg := new(sync.WaitGroup)
