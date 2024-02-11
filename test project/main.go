@@ -2,12 +2,14 @@ package main
 
 import (
 	"encoding/json"
+	"flag"
 	"fmt"
 	"io"
 	"net/http"
 	"os"
 	"regexp"
 	"strings"
+	"sync"
 
 	"golang.org/x/net/html"
 )
@@ -23,17 +25,15 @@ const priceRegEx string = `\d+[\.,]*\d*`
 const itemIDRegEx string = `itm\/([0-9]+)\?`
 
 func main() {
-	// flag.Parse()
-	// fmt.Println(flag.Args())
-
-	// for _, cmd := range flag.Args() {
-	// 	switch cmd {
-	// 	case "condition":
-	// 		fmt.Println("condition", cmd)
-	// 	}
-	// }
-
 	pageURL := "https://www.ebay.com/sch/garlandcomputer/m.html"
+
+	conditionArg := flag.Int("condition", -1, "type of condition to filter. Possible values are: 3, 4 or 10.")
+
+	flag.Parse()
+
+	if *conditionArg != -1 {
+		pageURL = fmt.Sprintf("%s?LH_ItemCondition=%d", pageURL, *conditionArg)
+	}
 
 	for {
 		//Get HTML from the provided URL
@@ -69,13 +69,20 @@ func main() {
 
 		fmt.Printf("Found %d items\n", len(itemElementList))
 
+		os.Mkdir("data", os.ModeDir)
+
 		//Process nodes from the current page
+		wg := new(sync.WaitGroup)
+		wg.Add(len(itemElementList))
+
 		for i := 0; i < len(itemElementList); i++ {
-			err := processItemNode(itemElementList[i])
-			if err != nil {
-				fmt.Printf("ERROR::Failed processing item %s\n", err)
-			}
+			go processItemNode(itemElementList[i], wg)
+			// if err != nil {
+			// 	fmt.Printf("ERROR::Failed processing item %s\n", err)
+			// }
 		}
+
+		wg.Wait()
 
 		//If there are more pages - iterate
 		if hasMorePages {
@@ -175,7 +182,8 @@ func getElementNodeVal(node *html.Node) (string, error) {
 }
 
 // Function to process selected nodes (items)
-func processItemNode(node *html.Node) error {
+func processItemNode(node *html.Node, wg *sync.WaitGroup) error {
+	defer wg.Done()
 	itemLink := findFirstElementByAttr(node, "a", "class", "s-item__link")
 	if itemLink == nil {
 		return fmt.Errorf("ERROR::Item link node not found")
@@ -256,7 +264,7 @@ func processItemNode(node *html.Node) error {
 
 	itemJSON, _ := json.MarshalIndent(item, "", "	")
 
-	_ = os.WriteFile(fmt.Sprintf("./data/%s.json", itemID), itemJSON, 0644)
+	_ = os.WriteFile(fmt.Sprintf("data/%s.json", itemID), itemJSON, 0644)
 
 	return nil
 }
@@ -275,9 +283,3 @@ func getElementAttrByName(node *html.Node, attrName string) (string, error) {
 		return "", fmt.Errorf("ERROR::Node is not an element")
 	}
 }
-
-//error check
-//prototypes
-//async
-//conditions
-//no prettify on json output
